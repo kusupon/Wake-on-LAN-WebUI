@@ -98,9 +98,15 @@ export default function Home() {
       setNewDeviceName('');
       setNewMacAddress('');   
       loadDevices(); 
-    } catch (e: any) {
-      console.error('Error adding device:', e);
-      setError(e.message || 'Failed to add device.');
+    } catch (e: unknown) {
+      console.error('デバイス追加エラー:', e);
+      let errorMessage = 'デバイスの追加に失敗しました。';
+      if (e instanceof Error) {
+        errorMessage = e.message;
+      } else if (typeof e === 'string') {
+        errorMessage = e;
+      }
+      setError(errorMessage || 'デバイスの追加に失敗しました。');
     } finally {
       setIsAddingDevice(false);
     }
@@ -127,9 +133,15 @@ export default function Home() {
 
       setMessage(`Device "${deviceNameToDelete}" deleted successfully.`);
       loadDevices(); 
-    } catch (e: any) {
-      console.error('Error deleting device:', e);
-      setError(e.message || 'Failed to delete device.');
+    } catch (e: unknown) {
+      console.error('デバイス削除エラー:', e);
+      let errorMessage = 'デバイスの削除に失敗しました。';
+      if (e instanceof Error) {
+        errorMessage = e.message;
+      } else if (typeof e === 'string') { 
+        errorMessage = e;
+      }
+      setError(errorMessage || 'デバイスの削除に失敗しました。');
     }
   };
 

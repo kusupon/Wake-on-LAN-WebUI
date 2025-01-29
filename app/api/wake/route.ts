@@ -32,10 +32,10 @@ export async function POST(req: Request) {
 
     await wol.wake(macAddress);
     return NextResponse.json({ message: `Wake-on-LAN packet sent to ${deviceName} successfully.` }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending WOL packet:', error);
     return NextResponse.json(
-      { message: 'Failed to send Wake-on-LAN packet.', error: error.message },
+      { message: 'Failed to send Wake-on-LAN packet.', error },
       { status: 500 }
     );
   }

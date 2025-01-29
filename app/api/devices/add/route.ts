@@ -32,10 +32,10 @@ export async function POST(req: Request) {
     await fs.writeFile(DEVICES_JSON_PATH, JSON.stringify(devices, null, 2), 'utf-8');
 
     return NextResponse.json({ message: 'Device added successfully.', device: newDevice }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error adding device:', error);
     return NextResponse.json(
-      { message: 'Failed to add device.', error: error.message },
+      { message: 'Failed to add device.', error },
       { status: 500 }
     );
   }

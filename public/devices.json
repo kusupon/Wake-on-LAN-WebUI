@@ -1,0 +1,10 @@
+[
+  {
+    "name": "PC-1", 
+    "macAddress": "xx:xx:xx:xx:xx:xx"
+  },
+  {
+    "name": "PC-2",
+    "macAddress": "xx:xx:xx:xx:xx:xx"
+  }
+]

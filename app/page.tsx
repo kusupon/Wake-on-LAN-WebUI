@@ -1,101 +1,234 @@
-import Image from "next/image";
+'use client'
+
+import React, { useState, useEffect } from "react";
+
+interface DeviceInfo {
+  name: string;
+  macAddress: string;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [message, setMessage] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [devices, setDevices] = useState<DeviceInfo[]>([]);
+  const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
+  const [newDeviceName, setNewDeviceName] = useState<string>('');
+  const [newMacAddress, setNewMacAddress] = useState<string>('');
+  const [isAddingDevice, setIsAddingDevice] = useState<boolean>(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  useEffect(() => {
+    loadDevices();
+  }, []);
+
+  const loadDevices = async () => {
+    try {
+      const response = await fetch('/api/devices/list');
+      if (!response.ok) {
+        throw new Error(`デバイスの取得に失敗しました:${response.status} ${response.statusText}`);
+      }
+      const data: DeviceInfo[] = await response.json();
+      setDevices(data);
+    } catch (e) {
+      console.error('Failed to load devices:', e);
+      setError('デバイスリストの読み込みに失敗しました');
+    }
+  };
+
+  const wakeOnLan = async () => {
+    setMessage('');
+    setError('');
+
+    if (!selectedDeviceName) {
+      setError('デバイスを選択してください');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/wake', {
+        method: 'POST',
+        headers: {
+          'Cotent-Type': 'application/json',
+        },
+        body: JSON.stringify({ deviceName: selectedDeviceName }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage(data.message);
+      } else {
+        setError(data.message || 'Wake-on-Lanに失敗しました');
+        console.error('API Error', data);
+      }
+    } catch (e) {
+      setError('サーバーの接続に失敗しました');
+      console.error('Fetch Error:', e)
+    }
+  };
+
+  const handleDeviceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDeviceName(e.target.value);
+  };
+
+  const handleAddDevice = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); 
+    setError('');
+    setIsAddingDevice(true); 
+
+    if (!newDeviceName || !newMacAddress) {
+      setError('Device name and MAC address are required.');
+      setIsAddingDevice(false); 
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/devices/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newDeviceName, macAddress: newMacAddress }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json(); 
+        throw new Error(errorData.message || `Failed to add device: ${response.status} ${response.statusText}`);
+      }
+
+      setMessage('Device added successfully.');
+      setNewDeviceName('');
+      setNewMacAddress('');   
+      loadDevices(); 
+    } catch (e: any) {
+      console.error('Error adding device:', e);
+      setError(e.message || 'Failed to add device.');
+    } finally {
+      setIsAddingDevice(false);
+    }
+  };
+
+  const handleDeleteDevice = async (deviceNameToDelete: string) => {
+    setMessage('');
+    setError('');
+
+    if (!deviceNameToDelete) {
+      setError('Device name is required for deletion.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/devices/delete/${deviceNameToDelete}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to delete device: ${response.status} ${response.statusText}`);
+      }
+
+      setMessage(`Device "${deviceNameToDelete}" deleted successfully.`);
+      loadDevices(); 
+    } catch (e: any) {
+      console.error('Error deleting device:', e);
+      setError(e.message || 'Failed to delete device.');
+    }
+  };
+
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen py-2 bg-gray-100">
+      <h1 className="text-2xl font-bold mb-4">Wake on LAN WebUI</h1>
+      <div className="mb-4">
+        <label htmlFor="device-select" className="block text-gray-700 text-sm font-bold mb-2">
+          デバイスを選択:
+        </label>
+        <select
+          id="device-select"
+          value={selectedDeviceName}
+          onChange={handleDeviceChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        >
+          <option value="">-- Select Device --</option>
+          {devices.map((device) => (
+            <option key={device.name} value={device.name}>
+              {device.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <button
+        onClick={wakeOnLan}
+        disabled={!selectedDeviceName}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mb-4"
+      >
+        Wake Device
+      </button>
+      <div className="mb-4 w-full max-w-md">
+        <h2 className="text-lg font-bold mb-2 text-gray-700">デバイスリスト</h2>
+        {devices.length > 0 ? (
+          <ul className="border rounded shadow-sm">
+            {devices.map((device) => (
+              <li key={device.name} className="px-4 py-2 border-b last:border-b-0 flex justify-between items-center">
+                <div>
+                  <span className="font-semibold">{device.name}</span>
+                  <span className="text-gray-500 ml-2">({device.macAddress})</span>
+                </div>
+                <button
+                  onClick={() => handleDeleteDevice(device.name)}
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-sm focus:outline-none focus:shadow-outline"
+                >
+                  削除
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500">No devices added yet.</p>
+        )}
+      </div>
+
+      <div className="mb-4 w-full max-w-md">
+        <h2 className="text-lg font-bold mb-2 text-gray-700">デバイスを追加</h2>
+        <form onSubmit={handleAddDevice} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+          <div className="mb-4">
+            <label htmlFor="deviceName" className="block text-gray-700 text-sm font-bold mb-2">
+              デバイス名:
+            </label>
+            <input
+              type="text"
+              id="deviceName"
+              placeholder="e.g., PC-A"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              value={newDeviceName}
+              onChange={(e) => setNewDeviceName(e.target.value)}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          </div>
+          <div className="mb-6">
+            <label htmlFor="macAddress" className="block text-gray-700 text-sm font-bold mb-2">
+              MACアドレス:
+            </label>
+            <input
+              type="text"
+              id="macAddress"
+              placeholder="e.g., 00:11:22:33:44:55"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              value={newMacAddress}
+              onChange={(e) => setNewMacAddress(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              className={`bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${isAddingDevice ? 'opacity-50 cursor-not-allowed' : ''}`}
+              type="submit"
+              disabled={isAddingDevice} 
+            >
+              {isAddingDevice ? 'Adding...' : '追加'}
+            </button>
+          </div>
+        </form>
+      </div>
+      {message && <p className="text-green-500 mt-4">{message}</p>}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
     </div>
   );
 }

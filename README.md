@@ -1,5 +1,5 @@
 # Wake on LAN WebUI
-
+![Image](https://github.com/user-attachments/assets/9c780323-2e9f-456d-871c-e66063445141)
 ブラウザから気軽にWOLすることが出来るwebアプリです
 
 
@@ -16,12 +16,8 @@ $ cd Wake-on-LAN-WebUI
 $ npm install
 $ npm run build
 
-# 念の為動くか確認
-$ npm run start
-
 # サーバー起動
 $ pm2 start npm --name "wol-webui" -- start
-
 ```
 http://(サーバーのip):3005 でアクセス出来ます。
 

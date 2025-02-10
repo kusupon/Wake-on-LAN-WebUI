@@ -23,31 +23,31 @@ http://(サーバーのip):3005 でアクセス出来ます。
 外出先からアクセスする場合はTailscale等を使用してください
 
 ## API
-### デバイスリスト取得
-エンドポイント: `/api/devices/list`  
-メソッド: `GET`
-### デバイス追加
-エンドポイント: `/api/devices/add`  
-メソッド: `POST`  
-```
-{
-  "name": "デバイス名",
-  "macAddress": "MAC アドレス"
-}
-```
-### デバイス削除
-エンドポイント: `/api/devices/delete/[deviceName]`  
-メソッド: `DELETE`  
+- ### デバイスリスト取得
+  エンドポイント: `/api/devices/list`  
+  メソッド: `GET`
+- ### デバイス追加
+  エンドポイント: `/api/devices/add`  
+  メソッド: `POST`  
+  ```
+  {
+    "name": "デバイス名",
+    "macAddress": "MAC アドレス"
+  }
+  ```
+- ### デバイス削除
+  エンドポイント: `/api/devices/delete/[deviceName]`  
+  メソッド: `DELETE`  
 
 
-### Wake on LAN
-エンドポイント:`/api/wake`  
-メソッド: `POST`  
-```
-{
-  "deviceName": "デバイス名"
-}
-```
+- ### Wake on LAN
+  エンドポイント:`/api/wake`  
+  メソッド: `POST`  
+  ```
+  { 
+    "deviceName": "デバイス名"
+  }
+  ```
 
 ## devices.json
 ```

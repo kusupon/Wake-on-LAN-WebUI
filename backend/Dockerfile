@@ -6,8 +6,6 @@ COPY . .
 
 RUN go mod download
 
-RUN go build -o main
-
 EXPOSE 8008
 
-CMD ["go", "run", "main.go"]
+CMD ["air", "-c", ".air.toml"]

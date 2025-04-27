@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"wakeonlan/device"
 	"wakeonlan/model"
 	"wakeonlan/wakeonlan"
+	"wakeonlan/device"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +24,7 @@ func WakeOnLan(c *gin.Context) {
 	var list []model.Device
 	json.Unmarshal(data, &list)
 
-	device, ok := device.FindDevice(list, wakeDevice.DeviceName)
+	device, ok := device.FindDeviceMac(list, wakeDevice.DeviceName)
 	if !ok {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "デバイスが見つかりません",

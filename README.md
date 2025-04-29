@@ -1,27 +1,34 @@
 # Wake on LAN WebUI
-![image](./public/Screenshot.png)
-ブラウザから気軽にWOLすることが出来るwebアプリです
+
+Wake on Lanマジックパケットをブラウザ上で送信することが出来るwebアプリです。  
+バックエンドはGo、フロントエンドはNext.js(SSG)で構成しています。
 
 ## 環境構築
-⚠️自宅にあるサーバーやラズパイ等にホスティングすることを想定しています
 
-Node.jsとPM2が必要です
+### 動作確認環境
+Ubuntu 22.04 LTS  
+### 必要なソフト
+- Docker  
+- Docker Compose
+
+### インストールと起動
 ```
 # リポジトリのクローン
-$ git clone https://github.com/kusupon/Wake-on-LAN-WebUI.git
-$ cd Wake-on-LAN-WebUI
+git clone https://github.com/kusupon/Wake-on-LAN-WebUI.git
+cd Wake-on-LAN-WebUI
 
-# インストールとビルド
-$ npm install
-$ npm run build
-
-# サーバー起動
-$ pm2 start npm --name "wol-webui" -- start
+# コンテナの起動
+docker compose up -d --build
 ```
-http://(サーバーのip):3005 でアクセス出来ます。
+起動後、以下のURLからWeb UIにアクセス出来ます。  
+`http://<サーバーのIP>:3005`  
 
 外出先からアクセスする場合はTailscale等を使用してください
 
+## ポート設定
+
+APIサーバー: `8008`  
+Web UI: `3005`
 ## API
 - ### デバイスリスト取得
   エンドポイント: `/api/devices/list`  
@@ -50,10 +57,12 @@ http://(サーバーのip):3005 でアクセス出来ます。
   ```
 
 ## devices.json
+デバイス情報(端末名とMacアドレス)を保管します。
+API初回リクエスト時に自動生成されるので手動で用意する必要はありません。
 ```
 [
   {
-    "name": "PC-1", 
+    "name": "PC-1",
     "macAddress": "xx:xx:xx:xx:xx:xx"
   },
   {

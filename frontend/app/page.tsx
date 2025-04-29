@@ -22,7 +22,7 @@ export default function Home() {
 
   const loadDevices = async () => {
     try {
-      const response = await fetch('http://localhost:8008/api/devices/list');
+      const response = await fetch('/api/devices/list');
       if (!response.ok) {
         throw new Error(`デバイスの取得に失敗しました:${response.status} ${response.statusText}`);
       }
@@ -44,7 +44,7 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch('http://localhost:8008/api/wake', {
+      const response = await fetch('/api/wake', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch('http://localhost:8008/api/devices/add', {
+      const response = await fetch('/api/devices/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +122,7 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8008/api/devices/delete/${deviceNameToDelete}`, {
+      const response = await fetch(`/api/devices/delete/${deviceNameToDelete}`, {
         method: 'DELETE',
       });
 

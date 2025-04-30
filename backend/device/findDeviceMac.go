@@ -2,11 +2,11 @@ package device
 
 import "wakeonlan/model"
 
-func FindDeviceMac(devices []model.Device, name string) (*model.Device, bool) {
-	for i := range devices {
-		if devices[i].Name == name {
-			return &devices[i], true
-		}
+func FindDeviceMac(devices []model.Device, name string) (model.Device, bool) {
+	for _, d := range devices {
+			if d.Name == name {
+					return d, true
+			}
 	}
-	return nil, false
+	return model.Device{}, false
 }

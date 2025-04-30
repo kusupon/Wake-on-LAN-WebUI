@@ -12,19 +12,21 @@ import (
 )
 
 func WakeOnLan(c *gin.Context) {
-	var wakeDevice model.WakeDevice
-	if err := c.ShouldBindJSON(&wakeDevice); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "JSONの解析に失敗しました",
+	deviceName := c.Param("name")
+
+	data, err := os.ReadFile("./devices.json")
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "デバイスリストの読み込みに失敗しました。",
 		})
 		return
 	}
 
-	data, _ := os.ReadFile("./devices.json")
 	var list []model.Device
 	json.Unmarshal(data, &list)
 
-	device, ok := device.FindDeviceMac(list, wakeDevice.DeviceName)
+	device, ok := device.FindDeviceMac(list, deviceName)
 	if !ok {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "デバイスが見つかりません",
@@ -40,6 +42,6 @@ func WakeOnLan(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Wake-on-LAN packet sent to  successfully.",
+		"message": "Wake-on-LAN packet sent to \"" + deviceName + "\" successfully.", 
 	})
 }

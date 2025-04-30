@@ -9,9 +9,9 @@ import (
 func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
-	router.GET("/api/devices/list", handler.DeviceList)
-	router.POST("/api/devices/add", handler.AddDevice)
-	router.DELETE("/api/devices/delete/:name", handler.Delete)
-	router.POST("/api/wake", handler.WakeOnLan)
+	router.GET("/api/devices", handler.DeviceList)
+	router.POST("/api/devices", handler.AddDevice)
+	router.DELETE("/api/devices/:name", handler.Delete)
+	router.POST("/api/devices/:name/wake", handler.WakeOnLan)
 	router.Run(":8008")
 }

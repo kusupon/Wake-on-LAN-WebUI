@@ -2,11 +2,15 @@ FROM golang:latest
 
 WORKDIR /app
 
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
-RUN go mod download
-RUN go install github.com/air-verse/air@latest
+RUN [ -f devices.json ] || echo '[]' > devices.json
+
+RUN go build -o server .
 
 EXPOSE 8008
 
-CMD ["air", "-c", ".air.toml"]
+CMD ["./server"]

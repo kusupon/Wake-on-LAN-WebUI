@@ -31,11 +31,9 @@ APIサーバー: `8008`
 Web UI: `3005`
 ## API
 - ### デバイスリスト取得
-  エンドポイント: `/api/devices/list`  
-  メソッド: `GET`
+  `GET /api/devices/`
 - ### デバイス追加
-  エンドポイント: `/api/devices/add`  
-  メソッド: `POST`  
+  `POST /api/devices/`    
   ```
   {
     "name": "デバイス名",
@@ -43,22 +41,15 @@ Web UI: `3005`
   }
   ```
 - ### デバイス削除
-  エンドポイント: `/api/devices/delete/[deviceName]`  
-  メソッド: `DELETE`  
+  `DELETE /api/devices/[deviceName]`   
 
 
 - ### Wake on LAN
-  エンドポイント:`/api/wake`  
-  メソッド: `POST`  
-  ```
-  { 
-    "deviceName": "デバイス名"
-  }
-  ```
+  `POST /api/devices/[deviceName]/wake`  
 
 ## devices.json
 デバイス情報(端末名とMacアドレス)を保管します。
-API初回リクエスト時に自動生成されるので手動で用意する必要はありません。
+コンテナ初回起動時に自動生成されるので手動で用意する必要はありません。
 ```
 [
   {

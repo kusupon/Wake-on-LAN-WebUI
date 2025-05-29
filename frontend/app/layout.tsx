@@ -24,8 +24,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+        (function() {
+          const m = localStorage.getItem('dark-mode');
+          if (m === 'true') {
+            document.documentElement.classList.add('dark');
+          }
+        })();
+      `,
+          }}
+        />
+      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 dark:bg-slate-900`}
       >
         {children}
       </body>

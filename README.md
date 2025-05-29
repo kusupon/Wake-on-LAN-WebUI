@@ -1,8 +1,8 @@
 # Wake on LAN WebUI
+![image](./frontend/public/Screenshot.png)
 
 Wake on Lanマジックパケットをブラウザ上で送信することが出来るwebアプリです。  
 バックエンドはGo、フロントエンドはNext.js(SSG)で構成しています。
-
 ## 環境構築
 
 ### 動作確認環境

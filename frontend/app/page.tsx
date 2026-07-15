@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Power, Trash2, Moon, Sun } from 'lucide-react';
 
 interface DeviceInfo {
@@ -18,40 +18,40 @@ export default function WOLDashboard() {
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('dark-mode');
-    if (saved === 'true') {
-      setDarkMode(true);
+    const savedDarkMode = localStorage.getItem('dark-mode') === 'true';
+    if (savedDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
-      setDarkMode(false);
       document.documentElement.classList.remove('dark');
     }
+    const frame = requestAnimationFrame(() => setDarkMode(savedDarkMode));
+    return () => cancelAnimationFrame(frame);
   }, []);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('dark-mode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('dark-mode', 'false');
-    }
-  }, [darkMode]);
-
-  useEffect(() => {
-    loadDevices();
-  }, []);
-
-  const loadDevices = async () => {
-    setError('');
+  const loadDevices = useCallback(async () => {
     try {
       const res = await fetch('/api/devices');
+      setError('');
       if (!res.ok) throw new Error('デバイスの取得に失敗しました');
       const data = await res.json();
       setDevices(Array.isArray(data) ? data : []);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'デバイスリストの読み込みに失敗しました');
     }
+  }, []);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => void loadDevices());
+    return () => cancelAnimationFrame(frame);
+  }, [loadDevices]);
+
+  const toggleDarkMode = () => {
+    setDarkMode((current) => {
+      const next = !current;
+      document.documentElement.classList.toggle('dark', next);
+      localStorage.setItem('dark-mode', String(next));
+      return next;
+    });
   };
 
   const wakeOnLan = async (deviceName: string) => {
@@ -146,7 +146,7 @@ export default function WOLDashboard() {
           type="button"
           aria-label="Toggle dark mode"
           className="flex items-center justify-center w-10 h-10 rounded-full bg-[#e7edf4] dark:bg-slate-700 hover:bg-[#d2dbe6] dark:hover:bg-slate-800 text-[#0d141c] dark:text-white transition-colors duration-150 ease-in-out"
-          onClick={() => setDarkMode((v) => !v)}
+          onClick={toggleDarkMode}
         >
           {darkMode ? <Sun size={20} /> : <Moon size={20} />}
         </button>

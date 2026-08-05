@@ -8,6 +8,16 @@ interface DeviceInfo {
   macAddress: string;
 }
 
+async function fetchDevices(signal?: AbortSignal): Promise<DeviceInfo[]> {
+  const res = await fetch('/api/devices', { signal });
+  if (!res.ok) {
+    throw new Error('デバイスの取得に失敗しました');
+  }
+
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+
 export default function WOLDashboard() {
   const [devices, setDevices] = useState<DeviceInfo[]>([]);
   const [search, setSearch] = useState('');
@@ -30,20 +40,33 @@ export default function WOLDashboard() {
 
   const loadDevices = useCallback(async () => {
     try {
-      const res = await fetch('/api/devices');
+      const data = await fetchDevices();
       setError('');
-      if (!res.ok) throw new Error('デバイスの取得に失敗しました');
-      const data = await res.json();
-      setDevices(Array.isArray(data) ? data : []);
+      setDevices(data);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'デバイスリストの読み込みに失敗しました');
     }
   }, []);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => void loadDevices());
-    return () => cancelAnimationFrame(frame);
-  }, [loadDevices]);
+    const controller = new AbortController();
+
+    void fetchDevices(controller.signal)
+      .then((data) => {
+        setError('');
+        setDevices(data);
+      })
+      .catch((e: unknown) => {
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          return;
+        }
+        setError(e instanceof Error ? e.message : 'デバイスリストの読み込みに失敗しました');
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   const toggleDarkMode = () => {
     setDarkMode((current) => {

@@ -23,4 +23,4 @@ RUN echo '[]' > devices.json
 
 EXPOSE 8008
 
-CMD ["sh", "-c", "[ -f devices.json ] || echo '[]' > devices.json; chown app:app devices.json; exec su-exec app /server"]
+CMD ["sh", "-c", "[ -f devices.json ] || echo '[]' > devices.json; chown -h app:app devices.json; exec su-exec app /server"]

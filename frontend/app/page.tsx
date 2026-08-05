@@ -39,9 +39,9 @@ export default function WOLDashboard() {
   }, []);
 
   const loadDevices = useCallback(async () => {
+    setError('');
     try {
       const data = await fetchDevices();
-      setError('');
       setDevices(data);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'デバイスリストの読み込みに失敗しました');
